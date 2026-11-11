@@ -1,0 +1,148 @@
+### Chat Backend REST Client Specification
+@baseUrl = http://localhost:3000
+@contentType = application/json
+
+### 0. Health Check
+GET {{baseUrl}}/health
+Content-Type: {{contentType}}
+
+###
+
+### 1. List All Users
+# @name listUsers
+GET {{baseUrl}}/user
+Content-Type: {{contentType}}
+
+###
+
+### 2. Create User 1 (Alice)
+# @name createAlice
+POST {{baseUrl}}/user/create
+Content-Type: {{contentType}}
+
+{
+  "name": "Alice Smith",
+  "email": "alice.demo@example.com"
+}
+
+###
+
+### 3. Create User 2 (Bob)
+# @name createBob
+POST {{baseUrl}}/user/create
+Content-Type: {{contentType}}
+
+{
+  "name": "Bob Jones",
+  "email": "bob.demo@example.com"
+}
+
+###
+
+### 4. Create or Get Direct Chat (API 1)
+# @name createDirectChat
+# Replace userAId and userBId with actual user IDs from create user / list users
+POST {{baseUrl}}/chat/create
+Content-Type: {{contentType}}
+
+{
+  "userAId": "0f3ef420-9509-455f-8afc-0803cf8f62a0",
+  "userBId": "6fb6ca7a-a3cc-44c3-9bab-c67ab5858c1a"
+}
+
+###
+
+### 5. Send Message (API 2)
+# Replace chatId and senderId with actual IDs
+@chatId = 94842f95-991e-4915-a203-0e0fcae961d0
+@aliceId = 0f3ef420-9509-455f-8afc-0803cf8f62a0
+@bobId = 6fb6ca7a-a3cc-44c3-9bab-c67ab5858c1a
+
+# @name sendMessage
+POST {{baseUrl}}/chat/{{chatId}}/message/send
+Content-Type: {{contentType}}
+
+{
+  "senderId": "{{aliceId}}",
+  "text": "Hello Bob! Testing real-time message storage in Firestore."
+}
+
+###
+
+### 6. Get Messages with Limit & Ordering (API 3)
+# @name getMessages
+GET {{baseUrl}}/chat/{{chatId}}/messages?limit=50&userId={{aliceId}}
+Content-Type: {{contentType}}
+
+###
+
+### 7. Mark Message Read (API 4)
+# Replace messageId with actual message ID returned from sendMessage or getMessages
+@messageId = YPwGxEB6SwDbFAJ8BlDl
+
+# @name markMessageRead
+POST {{baseUrl}}/chat/{{chatId}}/message/{{messageId}}/read
+Content-Type: {{contentType}}
+
+{
+  "userId": "{{bobId}}"
+}
+
+###
+
+### 8. Update Last Seen Message (API 5)
+# @name updateLastSeen
+POST {{baseUrl}}/chat/{{chatId}}/lastseen
+Content-Type: {{contentType}}
+
+{
+  "userId": "{{bobId}}",
+  "messageId": "{{messageId}}"
+}
+
+###
+
+### 9. List User Chats with Member IDs & Message Previews (API 6)
+# @name listUserChats
+GET {{baseUrl}}/user/{{aliceId}}/chats
+Content-Type: {{contentType}}
+
+###
+
+### 10. Bonus: Create Group Chat
+# @name createGroupChat
+POST {{baseUrl}}/chat/group/create
+Content-Type: {{contentType}}
+
+{
+  "creatorId": "{{aliceId}}",
+  "name": "Backend Team Sprint",
+  "memberIds": [
+    "{{bobId}}",
+    "4f26c865-f66d-41cb-9811-762b42db1511"
+  ]
+}
+
+###
+
+### 11. Bonus: Edit Message
+# @name editMessage
+PUT {{baseUrl}}/chat/{{chatId}}/message/{{messageId}}
+Content-Type: {{contentType}}
+
+{
+  "userId": "{{aliceId}}",
+  "text": "Hello Bob! Testing updated text (edited)."
+}
+
+###
+
+### 12. Bonus: Delete Message (Soft Delete)
+# @name deleteMessage
+DELETE {{baseUrl}}/chat/{{chatId}}/message/{{messageId}}
+Content-Type: {{contentType}}
+
+{
+  "userId": "{{aliceId}}"
+}
+
