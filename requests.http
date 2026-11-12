@@ -1,5 +1,5 @@
 ### Chat Backend REST Client Specification
-@baseUrl = http://localhost:3000
+@baseUrl = http://localhost:3000/api
 @contentType = application/json
 
 ### 0. Health Check
@@ -41,7 +41,6 @@ Content-Type: {{contentType}}
 
 ### 4. Create or Get Direct Chat (API 1)
 # @name createDirectChat
-# Replace userAId and userBId with actual user IDs from create user / list users
 POST {{baseUrl}}/chat/create
 Content-Type: {{contentType}}
 
@@ -53,7 +52,6 @@ Content-Type: {{contentType}}
 ###
 
 ### 5. Send Message (API 2)
-# Replace chatId and senderId with actual IDs
 @chatId = 94842f95-991e-4915-a203-0e0fcae961d0
 @aliceId = 0f3ef420-9509-455f-8afc-0803cf8f62a0
 @bobId = 6fb6ca7a-a3cc-44c3-9bab-c67ab5858c1a
@@ -77,8 +75,7 @@ Content-Type: {{contentType}}
 ###
 
 ### 7. Mark Message Read (API 4)
-# Replace messageId with actual message ID returned from sendMessage or getMessages
-@messageId = YPwGxEB6SwDbFAJ8BlDl
+@messageId = wGxCLL2bAo5QtfrkGYAw
 
 # @name markMessageRead
 POST {{baseUrl}}/chat/{{chatId}}/message/{{messageId}}/read
@@ -145,4 +142,3 @@ Content-Type: {{contentType}}
 {
   "userId": "{{aliceId}}"
 }
-

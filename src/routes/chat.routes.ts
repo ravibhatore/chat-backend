@@ -35,6 +35,11 @@ router.post(
   validate({ params: chatIdParamSchema, body: manageGroupMemberSchema }),
   ChatController.addMemberToGroup
 );
+router.post(
+  '/:chatId/members/remove',
+  validate({ params: chatIdParamSchema, body: manageGroupMemberSchema }),
+  ChatController.removeMemberFromGroup
+);
 
 // Messages
 router.post(

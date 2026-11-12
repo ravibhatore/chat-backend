@@ -7,6 +7,7 @@ export function sendSuccess<T>(
   message?: string
 ): Response {
   const payload: Record<string, unknown> = {
+    code: statusCode,
     success: true,
   };
 

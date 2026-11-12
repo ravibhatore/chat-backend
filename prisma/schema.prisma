@@ -8,10 +8,10 @@ datasource db {
 }
 
 model User {
-  id        String       @id @default(uuid())
-  name      String
-  email     String       @unique
-  createdAt DateTime     @default(now()) @map("created_at")
+  id          String       @id @default(uuid())
+  name        String
+  email       String       @unique
+  createdAt   DateTime     @default(now()) @map("created_at")
   memberships ChatMember[]
 
   @@map("users")
@@ -43,4 +43,3 @@ model ChatMember {
   @@index([chatId])
   @@map("chat_members")
 }
-

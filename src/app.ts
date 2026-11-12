@@ -17,13 +17,13 @@ export function createApp() {
   }
 
   app.get('/', (_req: Request, res: Response) => {
-    res.json({ message: 'Chat API is running', docs: '/health' });
+    res.json({ code: 200, message: 'Chat API is running', docs: '/api/health' });
   });
 
-  app.use('/', routes);
+  app.use('/api', routes);
 
   app.use((_req: Request, res: Response) => {
-    res.status(404).json({ success: false, error: 'Route not found' });
+    res.status(404).json({ code: 404, success: false, error: 'Route not found' });
   });
 
   app.use(errorHandler);

@@ -1,4 +1,3 @@
-import { Prisma } from '@prisma/client';
 import { prisma } from '../config/database';
 import { firestore } from '../config/firebase';
 import { getCanonicalDirectKey } from '../utils/canonical';
@@ -32,54 +31,31 @@ export class ChatService {
       };
     }
 
-    // Create chat + memberships atomically
-    try {
-      const created = await prisma.$transaction(async (tx) => {
-        const chat = await tx.chat.create({
-          data: {
-            type: 'direct',
-            canonicalKey,
-          },
-        });
-
-        await tx.chatMember.createMany({
-          data: [
-            { chatId: chat.id, userId: userAId, role: 'member' },
-            { chatId: chat.id, userId: userBId, role: 'member' },
-          ],
-        });
-
-        return chat;
+    const created = await prisma.$transaction(async (tx) => {
+      const chat = await tx.chat.create({
+        data: {
+          type: 'direct',
+          canonicalKey,
+        },
       });
 
-      return {
-        chatId: created.id,
-        type: created.type,
-        isNew: true,
-        memberIds: [userAId, userBId],
-        createdAt: created.createdAt,
-      };
-    } catch (err) {
-      // In case another request created the chat concurrently
-      if (err instanceof Prisma.PrismaClientKnownRequestError && err.code === 'P2002') {
-        const raceChat = await prisma.chat.findUnique({
-          where: { canonicalKey },
-          include: {
-            members: { select: { userId: true } },
-          },
-        });
-        if (raceChat) {
-          return {
-            chatId: raceChat.id,
-            type: raceChat.type,
-            isNew: false,
-            memberIds: raceChat.members.map((m) => m.userId),
-            createdAt: raceChat.createdAt,
-          };
-        }
-      }
-      throw err;
-    }
+      await tx.chatMember.createMany({
+        data: [
+          { chatId: chat.id, userId: userAId, role: 'member' },
+          { chatId: chat.id, userId: userBId, role: 'member' },
+        ],
+      });
+
+      return chat;
+    });
+
+    return {
+      chatId: created.id,
+      type: created.type,
+      isNew: true,
+      memberIds: [userAId, userBId],
+      createdAt: created.createdAt,
+    };
   }
 
   static async createGroupChat(creatorId: string, name: string, memberIds: string[]) {
@@ -230,5 +206,42 @@ export class ChatService {
     return prisma.chatMember.create({
       data: { chatId, userId, role: 'member' },
     });
+  }
+
+  static async removeMemberFromGroup(requesterId: string, chatId: string, userId: string) {
+    const chat = await prisma.chat.findUnique({
+      where: { id: chatId },
+      include: { members: true },
+    });
+
+    if (!chat) {
+      throw new NotFoundError(`Chat ${chatId} not found`);
+    }
+
+    if (chat.type !== 'group') {
+      throw new BadRequestError('Cannot remove members from a 1:1 chat');
+    }
+
+    const requester = chat.members.find((m) => m.userId === requesterId);
+    if (!requester) {
+      throw new ForbiddenError('Only chat members can perform this action');
+    }
+
+    if (requesterId !== userId && requester.role !== 'admin') {
+      throw new ForbiddenError('Only group admins can remove other members');
+    }
+
+    const target = chat.members.find((m) => m.userId === userId);
+    if (!target) {
+      throw new NotFoundError('Target user is not in this chat');
+    }
+
+    await prisma.chatMember.delete({
+      where: {
+        chatId_userId: { chatId, userId },
+      },
+    });
+
+    return { removedUserId: userId, chatId };
   }
 }

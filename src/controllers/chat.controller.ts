@@ -34,4 +34,15 @@ export class ChatController {
       next(err);
     }
   }
+
+  static async removeMemberFromGroup(req: Request, res: Response, next: NextFunction): Promise<void> {
+    try {
+      const { chatId } = req.params;
+      const { requesterId, userId } = req.body;
+      const result = await ChatService.removeMemberFromGroup(requesterId, chatId!, userId);
+      sendSuccess(res, result);
+    } catch (err) {
+      next(err);
+    }
+  }
 }

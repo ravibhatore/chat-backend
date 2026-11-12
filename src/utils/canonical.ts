@@ -1,6 +1,5 @@
 import { BadRequestError } from './errors';
 
-// Helper to keep direct chats unique regardless of who initiated it (userA vs userB)
 export function getCanonicalDirectKey(userAId: string, userBId: string): string {
   const a = userAId.trim();
   const b = userBId.trim();

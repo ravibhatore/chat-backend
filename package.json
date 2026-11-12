@@ -11,8 +11,7 @@
     "prisma:push": "prisma db push",
     "prisma:migrate": "prisma migrate dev",
     "prisma:studio": "prisma studio",
-    "seed": "tsx src/scripts/seed.ts",
-    "test:api": "tsx src/scripts/test-api.ts"
+    "seed": "tsx src/scripts/seed.ts"
   },
   "keywords": [
     "chat",
